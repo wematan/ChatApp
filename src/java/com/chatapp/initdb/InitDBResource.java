@@ -147,4 +147,49 @@ public class InitDBResource {
             
         return createTableQuery.execute();
     }
+    
+    @GET
+    @Path("clearTables")
+    public void clearTables() {
+        Connection connection = null;
+     
+        try 
+        {
+            try {
+                Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+            } 
+            catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            } 
+
+            connection = DriverManager.getConnection(
+                    "jdbc:sqlserver://app9443.database.windows.net:1433;database=chatapp;user=chatapp@app9443;password=dov#2017");
+            
+            PreparedStatement clearTablesQuery = connection.prepareStatement(
+                "DELETE FROM chatapp.USERS;"
+                + "DELETE FROM chatapp.MESSAGES;");
+            
+            clearTablesQuery.execute();
+            System.out.println("Cleared Database Tables.");
+        }
+        catch (SQLException e){
+            e.printStackTrace();
+            //return false;
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        finally
+        {
+            try
+            {
+                connection.close();
+            }
+            catch (Exception e) 
+            {
+                e.printStackTrace();
+            }
+        }
+
+    }
 }
