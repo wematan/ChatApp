@@ -51,7 +51,6 @@ public class SignUpResource {
     public String signup(String inputJson) {
         User user = new Gson().fromJson(inputJson, User.class) ;
         
-//        User user = new User(inputJson.get("id").getAsString() , inputJson.get("name").getAsString(), inputJson.get("email").getAsString(), inputJson.get("phone").getAsString());
         JsonResponse returnMsg = new JsonResponse();
         if(checkUserExist(user) == true) {
             returnMsg.setStatus(1);
