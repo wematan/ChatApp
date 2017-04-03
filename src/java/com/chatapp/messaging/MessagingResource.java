@@ -6,7 +6,6 @@
 package com.chatapp.messaging;
 
 import com.chatapp.JsonResponse.JsonResponse;
-import com.chatapp.user.User;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.sql.Connection;
@@ -18,10 +17,10 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PUT;
 import javax.ws.rs.core.MediaType;
+import com.chatapp.messaging.FCMConnector;
 
 /**
  * REST Web Service
@@ -62,6 +61,39 @@ public class MessagingResource {
         else {
             returnMsg.setStatus(0);
             returnMsg.setMessage("User Doesn't Exist.");
+            }
+        
+        return new Gson().toJson(returnMsg);
+    }
+    
+    @PUT
+    @Path("sendMessage")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String sendMessage(String inputJson) {
+        FCMConnector fcm = FCMConnector.getInstance();
+        JsonResponse returnMsg = new JsonResponse();
+        
+        JsonObject placeholder = new Gson().fromJson(inputJson, JsonObject.class) ;
+        String phone = placeholder.get("phone").getAsString();
+         
+        if(checkUserExistByPhone(phone) == true) {
+            String recipientToken = getUserData();
+            JsonObject dataObject = new JsonObject(); 
+            JsonObject notificationObject = new JsonObject();
+            dataObject.addProperty("Message", placeholder.get("message").getAsString());
+            dataObject.addProperty("From", placeholder.get("phone").getAsString()); 
+            notificationObject.addProperty("Title", "New Message From " + placeholder.get("phone").getAsString()); 
+            // RECIPIENT is the token of the device, or device group, or a topic.
+            fcm.sendNotificationAndData(FCMConnector.TYPE_TO, RECIPIENT, notificationObject, dataObject);
+            storeMessage();
+                    
+            returnMsg.setStatus(0);
+            returnMsg.setMessage("Message Sent.");
+        }
+        else {
+            returnMsg.setStatus(-1);
+            returnMsg.setMessage("Error: User Doesn't Exist.");
             }
         
         return new Gson().toJson(returnMsg);
