@@ -21,30 +21,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.DriverManager;
 
-@DataSourceDefinition(
-    name = "java:global/jdbc/chatapp",
-    className = "org.apache.derby.jdbc.ClientDataSource",
-    url = "jdbc:derby://app9443.database.windows.net/",
-    databaseName = "chatapp",
-    user = "root",
-    password = "root" )
 
 /**
- * REST Web Service
+ * REST Web Service - To initialize the application DB resource
  *
  * @author MaTaN
  */
 @Path("InitDB")
-public class InitDBResource {
-    
-    
-    
-    //InitialContext ic = new InitialContext();
-    //DataSource dataSource = (DataSource) ic.lookup("java:global/jdbc/chatapp");
-    
-    //@Resource(name="java:global/jdbc/chatapp")
-    //DataSource dataSource;
-    
+public class InitDBResource {    
 
     @Context
     private UriInfo context;
@@ -119,7 +103,8 @@ public class InitDBResource {
               "CREATE TABLE chatapp.USERS" +
                     "(ID    BIGINT default -1 not null primary key," +
                     "NAME   VARCHAR(25) default null," +
-                    "EMAIL  VARCHAR(60) default null," +
+                    "EMAIL  VARCHAR(60) default null," + 
+                    "TOKEN  VARCHAR(500) default null," +
                     "PHONE  VARCHAR(15))\n"
                + " END ;"    
                 ) ;
@@ -134,13 +119,13 @@ public class InitDBResource {
               + "AND TABLE_NAME = 'MESSAGES'))"
               + "BEGIN\n" +
                     "CREATE TABLE chatapp.MESSAGES" +
-                    "(ID                BIGINT not null PRIMARY KEY," +
+                    "(ID                INT not null IDENTITY(1,1) PRIMARY KEY," +
                     "message            varchar(999) default null," +
                     "sender_id          BIGINT default -1 not null," +
                     "sender_name        VARCHAR(25) not null," +
                     "recipient_id       BIGINT default -1 not null," +
                     "recipient_name     VARCHAR(25) not null," +
-                    "timestamp timestamp," +
+                    "time DATETIME," +
                     "foreign key(sender_id) REFERENCES chatapp.USERS(ID))\n"
                + "END ;"
                     );

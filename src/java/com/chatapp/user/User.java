@@ -14,6 +14,7 @@ public class User {
    private String name;
    private String email;
    private String phone;
+   private String token;
    
    public User(){
    
@@ -24,7 +25,14 @@ public class User {
        this.name = name;
        this.email = email;
        this.phone = phone;
-   } 
+   }
+   public User(String id, String name, String email, String phone, String token){
+       this.id = id;
+       this.name = name;
+       this.email = email;
+       this.phone = phone;
+       this.token = token;
+   }
    
    public void setId(String id){
        this.id = id;
@@ -38,7 +46,9 @@ public class User {
    public void setPhone(String phone){
        this.phone = phone;
    }
-   
+   public void setToken(String token){
+       this.token = token;
+   }  
    public String getId(){
        return this.id;
    }
@@ -51,5 +61,7 @@ public class User {
    public String getPhone(){
        return this.phone;
    }
-   
+   public String getToken(){
+       return this.token;
+   }
 }

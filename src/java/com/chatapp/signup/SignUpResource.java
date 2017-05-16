@@ -4,8 +4,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
@@ -20,11 +18,11 @@ import com.chatapp.JsonResponse.JsonResponse;
 import com.chatapp.user.User;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 /**
- * REST Web Service
+ * REST Web Service - Web service for signing up user for the chat application.
  *
  * @author MaTaN
  */
@@ -48,12 +46,12 @@ public class SignUpResource {
     @Path("registerUser")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String signup(String inputJson) {
-        User user = new Gson().fromJson(inputJson, User.class) ;
-        
+    public String signup(String inputJson){
+        User user = new Gson().fromJson(inputJson, User.class);
+
         JsonResponse returnMsg = new JsonResponse();
         if(checkUserExist(user) == true) {
-            returnMsg.setStatus(1);
+            returnMsg.setStatus(-1);
             returnMsg.setMessage("User Already Exists.");
             return new Gson().toJson(returnMsg);
         }
@@ -64,7 +62,8 @@ public class SignUpResource {
                 returnMsg.setMessage("User Signup Successful.");
             }
             else {
-                   
+                returnMsg.setStatus(-1);
+                returnMsg.setMessage("Error!");
             }
         }
         
@@ -126,15 +125,87 @@ public class SignUpResource {
                         "jdbc:sqlserver://app9443.database.windows.net:1433;database=chatapp;user=chatapp@app9443;password=dov#2017");
 
             PreparedStatement createUser = connection.prepareStatement(
-                        "INSERT INTO chatapp.USERS (ID, \"NAME\", EMAIL, PHONE)\n" +
-                        "VALUES (?,?,?,?);"
+                        "INSERT INTO chatapp.USERS (ID, \"NAME\", EMAIL, PHONE, TOKEN)\n" +
+                        "VALUES (?,?,?,?,?);"
                         );
 
-            createUser.setInt(1, Integer.parseInt(user.getId()));
+            createUser.setLong(1, Long.parseLong(user.getId()));
             createUser.setString(2, user.getName());
             createUser.setString(3, user.getEmail());
             createUser.setString(4, user.getPhone());
+            createUser.setString(5, user.getToken());
             createUser.execute();
+            return true;
+        }
+        catch (SQLException e){
+            e.printStackTrace();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        finally {
+            try
+            {
+                connection.close();
+            }
+            catch (Exception e) 
+            {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Retrieves representation of an instance of com.chatapp.signup.SignUpResource
+     * @return an instance of java.lang.String
+     */
+    @PUT
+    @Path("updateToken")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String updateToken(String inputJson) throws Exception {
+        JSONObject jsonObj = (JSONObject) new JSONParser().parse(inputJson);
+        String token = jsonObj.get("token").toString();
+        String id = jsonObj.get("id").toString();
+        
+        JsonResponse returnMsg = new JsonResponse();
+        
+        boolean success = updateUserToken(id, token);
+        if (success == true){
+            returnMsg.setStatus(0);
+            returnMsg.setMessage("Updated User Token!");
+        }
+        else {
+            returnMsg.setStatus(-1);
+            returnMsg.setMessage("Error!");
+        }
+
+        
+        return new Gson().toJson(returnMsg);
+    }
+    
+    public boolean updateUserToken(String id, String token){
+        try {
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+        } 
+        catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        Connection connection = null;
+        try {
+            connection = DriverManager.getConnection(
+                        "jdbc:sqlserver://app9443.database.windows.net:1433;database=chatapp;user=chatapp@app9443;password=dov#2017");
+
+            PreparedStatement updateUserToken = connection.prepareStatement(
+                        "UPDATE chatapp.USERS\n" +
+                        "SET \"TOKEN\" = ?\n" +
+                        "WHERE \"ID\" = ? ;"
+                        );
+
+            updateUserToken.setString(1, token);
+            updateUserToken.setLong(2, Long.parseLong(id));
+            updateUserToken.execute();
             return true;
         }
         catch (SQLException e){
