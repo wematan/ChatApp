@@ -1,7 +1,5 @@
 package com.chatapp.signup;
 
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.PUT;
@@ -12,7 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.DriverManager;
 
 import com.chatapp.JsonResponse.JsonResponse;
 import com.chatapp.db.ChatAppDB;
