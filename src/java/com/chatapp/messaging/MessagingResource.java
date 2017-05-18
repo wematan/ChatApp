@@ -1,20 +1,13 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.chatapp.messaging;
 
 import com.chatapp.JsonResponse.JsonResponse;
+import com.chatapp.db.ChatAppDB;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Path;
@@ -30,9 +23,6 @@ import com.chatapp.user.User;
  */
 @Path("messaging")
 public class MessagingResource {
-
-    @Context
-    private UriInfo context;
 
     /**
      * Creates a new instance of MessagingResource
@@ -103,17 +93,10 @@ public class MessagingResource {
     }
     
     public String getUserToken(String recipient){
-        try {
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        } 
-        catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
         Connection connection = null;
-        try {
-            connection = DriverManager.getConnection(
-                        "jdbc:sqlserver://app9443.database.windows.net:1433;database=chatapp;user=chatapp@app9443;password=dov#2017");
-
+        try 
+          {
+            connection = ChatAppDB.getConnection();
             PreparedStatement getToken = connection.prepareStatement(
                         "SELECT TOKEN FROM chatapp.USERS\n" +
                         "WHERE Phone=?;"
@@ -145,17 +128,9 @@ public class MessagingResource {
     }
     
     public boolean checkUserExistByPhone(String phone){
-        try {
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        } 
-        catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
         Connection connection = null;
         try {
-            connection = DriverManager.getConnection(
-                        "jdbc:sqlserver://app9443.database.windows.net:1433;database=chatapp;user=chatapp@app9443;password=dov#2017");
-
+            connection = ChatAppDB.getConnection(); 
             PreparedStatement fetchUserByPhone = connection.prepareStatement(
                         "SELECT * FROM chatapp.USERS\n" +
                         "WHERE Phone=?;"
@@ -186,17 +161,9 @@ public class MessagingResource {
     }
     
     public User getUserByPhone(String phone) {
-        try {
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        } 
-        catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
         Connection connection = null;
         try {
-            connection = DriverManager.getConnection(
-                        "jdbc:sqlserver://app9443.database.windows.net:1433;database=chatapp;user=chatapp@app9443;password=dov#2017");
-
+            connection = ChatAppDB.getConnection();
             PreparedStatement getToken = connection.prepareStatement(
                         "SELECT * FROM chatapp.USERS\n" +
                         "WHERE Phone=?;"
@@ -232,17 +199,9 @@ public class MessagingResource {
         User senderUser = getUserByPhone(sender);
         User recipientUser = getUserByPhone(recipient);
         
-        try {
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        } 
-        catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
         Connection connection = null;
         try {
-            connection = DriverManager.getConnection(
-                        "jdbc:sqlserver://app9443.database.windows.net:1433;database=chatapp;user=chatapp@app9443;password=dov#2017");
-
+            connection = ChatAppDB.getConnection();
             PreparedStatement saveMessage = connection.prepareStatement(
              "INSERT INTO chatapp.MESSAGES (\"message\", \"sender_id\",\"sender_name\"," +
                                            "\"recipient_id\", \"recipient_name\", \"time\")\n" +
@@ -255,7 +214,6 @@ public class MessagingResource {
             saveMessage.setString(5, recipientUser.getName());
             java.util.Date today = new java.util.Date();
             saveMessage.setTimestamp(6, new java.sql.Timestamp(today.getTime()));
-
             saveMessage.execute();
             }
         catch (SQLException e){

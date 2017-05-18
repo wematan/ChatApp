@@ -15,6 +15,7 @@ import java.sql.PreparedStatement;
 import java.sql.DriverManager;
 
 import com.chatapp.JsonResponse.JsonResponse;
+import com.chatapp.db.ChatAppDB;
 import com.chatapp.user.User;
 
 import com.google.gson.Gson;
@@ -28,10 +29,6 @@ import org.json.simple.parser.JSONParser;
  */
 @Path("SignUp")
 public class SignUpResource {
-    
-    @Context
-    private UriInfo context;
-
     /**
      * Creates a new instance of SignUpResource
      */
@@ -71,17 +68,9 @@ public class SignUpResource {
     }
     
     public boolean checkUserExist(User user){
-        try {
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        } 
-        catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
         Connection connection = null;
         try {
-            connection = DriverManager.getConnection(
-                        "jdbc:sqlserver://app9443.database.windows.net:1433;database=chatapp;user=chatapp@app9443;password=dov#2017");
-
+            connection = ChatAppDB.getConnection();
             String id = user.getId();
             PreparedStatement fetchId = connection.prepareStatement(
                         "SELECT * FROM chatapp.USERS\n" +
@@ -113,17 +102,9 @@ public class SignUpResource {
     }
     
     public boolean registerUser(User user){
-        try {
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        } 
-        catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
         Connection connection = null;
         try {
-            connection = DriverManager.getConnection(
-                        "jdbc:sqlserver://app9443.database.windows.net:1433;database=chatapp;user=chatapp@app9443;password=dov#2017");
-
+            connection = ChatAppDB.getConnection();
             PreparedStatement createUser = connection.prepareStatement(
                         "INSERT INTO chatapp.USERS (ID, \"NAME\", EMAIL, PHONE, TOKEN)\n" +
                         "VALUES (?,?,?,?,?);"
@@ -186,17 +167,9 @@ public class SignUpResource {
     }
     
     public boolean updateUserToken(String id, String token){
-        try {
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        } 
-        catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
         Connection connection = null;
         try {
-            connection = DriverManager.getConnection(
-                        "jdbc:sqlserver://app9443.database.windows.net:1433;database=chatapp;user=chatapp@app9443;password=dov#2017");
-
+            connection = ChatAppDB.getConnection();
             PreparedStatement updateUserToken = connection.prepareStatement(
                         "UPDATE chatapp.USERS\n" +
                         "SET \"TOKEN\" = ?\n" +
@@ -227,4 +200,3 @@ public class SignUpResource {
         return false;
     }
 }
-

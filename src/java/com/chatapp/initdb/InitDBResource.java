@@ -1,26 +1,14 @@
 package com.chatapp.initdb;
 
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.PUT;
 import javax.ws.rs.core.MediaType;
-import javax.annotation.Resource;
-import javax.annotation.sql.DataSourceDefinition;
-import javax.sql.DataSource;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 
-
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.DriverManager;
-
+import com.chatapp.db.ChatAppDB;
 
 /**
  * REST Web Service - To initialize the application DB resource
@@ -30,14 +18,10 @@ import java.sql.DriverManager;
 @Path("InitDB")
 public class InitDBResource {    
 
-    @Context
-    private UriInfo context;
-
     /**
      * Creates a new instance of InitDBResource
      */
-    public InitDBResource() throws NamingException {
-    }
+    public InitDBResource(){}
 
     /**
      * Retrieves representation of an instance of com.chatapp.initdb.InitDBResource
@@ -48,19 +32,8 @@ public class InitDBResource {
     @Consumes(MediaType.APPLICATION_XML)
     public void initiateDatabase() {
         Connection connection = null;
-     
-        try 
-        {
-            try {
-                Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-            } 
-            catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            } 
-
-            connection = DriverManager.getConnection(
-                    "jdbc:sqlserver://app9443.database.windows.net:1433;database=chatapp;user=chatapp@app9443;password=dov#2017");
-            
+        try {
+            connection = ChatAppDB.getConnection();
             createDb(connection);
             createUsersTable(connection);
             createMessagesTable(connection);
@@ -84,7 +57,6 @@ public class InitDBResource {
                 e.printStackTrace();
             }
         }
-
     }
     public boolean createDb(Connection connection) throws SQLException{
         PreparedStatement createDbQuery = connection.prepareStatement(
@@ -137,19 +109,9 @@ public class InitDBResource {
     @Path("clearTables")
     public void clearTables() {
         Connection connection = null;
-     
         try 
         {
-            try {
-                Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-            } 
-            catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            } 
-
-            connection = DriverManager.getConnection(
-                    "jdbc:sqlserver://app9443.database.windows.net:1433;database=chatapp;user=chatapp@app9443;password=dov#2017");
-            
+            connection = ChatAppDB.getConnection();
             PreparedStatement clearTablesQuery = connection.prepareStatement(
                 "DELETE FROM chatapp.USERS;"
                 + "DELETE FROM chatapp.MESSAGES;");
@@ -175,6 +137,5 @@ public class InitDBResource {
                 e.printStackTrace();
             }
         }
-
     }
 }
