@@ -45,7 +45,7 @@ public class SignUpResource {
 
         JsonResponse returnMsg = new JsonResponse();
         if(checkUserExist(user) == true) {
-            returnMsg.setStatus(-1);
+            returnMsg.setStatus(1);
             returnMsg.setMessage("User Already Exists.");
             return new Gson().toJson(returnMsg);
         }
@@ -159,7 +159,6 @@ public class SignUpResource {
             returnMsg.setMessage("Error!");
         }
 
-        
         return new Gson().toJson(returnMsg);
     }
     
